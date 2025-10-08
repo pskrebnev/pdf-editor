@@ -3,7 +3,19 @@ import * as fs from 'fs';
 
 export class PDFEditor {
   async deletePages(inputPath: string, outputPath: string, pagesToDelete: number[]): Promise<void> {
-    console.log(`Deleting pages ${pagesToDelete.join(', ')} from ${inputPath}`);
+    const existingPdfBytes = fs.readFileSync(inputPath);
+    const pdfDoc = await PDFDocument.load(existingPdfBytes);
+
+    const sortedPages = pagesToDelete.sort((a, b) => b - a);
+
+    for (const pageNum of sortedPages) {
+      if (pageNum >= 0 && pageNum < pdfDoc.getPageCount()) {
+        pdfDoc.removePage(pageNum);
+      }
+    }
+
+    const pdfBytes = await pdfDoc.save();
+    fs.writeFileSync(outputPath, pdfBytes);
   }
 }
 
