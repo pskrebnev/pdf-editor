@@ -43,6 +43,22 @@ export class PDFEditor {
     const pdfBytes = await combinedPdf.save();
     fs.writeFileSync(outputPath, pdfBytes);
   }
+
+  async extractPages(inputPath: string, outputPath: string, pageNumbers: number[]): Promise<void> {
+    if (!fs.existsSync(inputPath)) {
+      throw new Error(`Input file not found: ${inputPath}`);
+    }
+    
+    const existingPdfBytes = fs.readFileSync(inputPath);
+    const existingPdf = await PDFDocument.load(existingPdfBytes);
+    const newPdf = await PDFDocument.create();
+
+    const pages = await newPdf.copyPages(existingPdf, pageNumbers);
+    pages.forEach((page) => newPdf.addPage(page));
+
+    const pdfBytes = await newPdf.save();
+    fs.writeFileSync(outputPath, pdfBytes);
+  }
 }
 
 async function main(): Promise<void> {
@@ -51,6 +67,7 @@ async function main(): Promise<void> {
   console.log('Available methods:');
   console.log('- deletePages(inputPath, outputPath, pagesToDelete)');
   console.log('- combinePages(inputPaths, outputPath)');
+  console.log('- extractPages(inputPath, outputPath, pageNumbers)');
 }
 
 if (require.main === module) {
