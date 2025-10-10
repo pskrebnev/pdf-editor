@@ -27,8 +27,31 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 const pdfEditor = new PDFEditor();
 
-app.get('/', (req, res) => {
-  res.json({ message: 'PDF Editor API' });
+app.post('/delete-pages', upload.single('pdf'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: 'No PDF file uploaded' });
+    }
+
+    const { pagesToDelete } = req.body;
+    if (!pagesToDelete) {
+      return res.status(400).json({ error: 'Pages to delete not specified' });
+    }
+
+    const pages = JSON.parse(pagesToDelete).map((p: string) => parseInt(p) - 1);
+    const outputPath = path.join('uploads', `deleted-pages-${Date.now()}.pdf`);
+
+    await pdfEditor.deletePages(req.file.path, outputPath, pages);
+
+    res.download(outputPath, (err) => {
+      if (!err) {
+        fs.unlinkSync(req.file!.path);
+        fs.unlinkSync(outputPath);
+      }
+    });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to delete pages' });
+  }
 });
 
 app.listen(port, () => {
