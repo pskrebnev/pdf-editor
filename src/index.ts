@@ -15,6 +15,8 @@ export class PDFEditor {
     for (const pageNum of sortedPages) {
       if (pageNum >= 0 && pageNum < pdfDoc.getPageCount()) {
         pdfDoc.removePage(pageNum);
+      } else {
+        console.warn(`Page ${pageNum + 1} is out of range (1-${pdfDoc.getPageCount()})`);
       }
     }
 
@@ -53,7 +55,15 @@ export class PDFEditor {
     const existingPdf = await PDFDocument.load(existingPdfBytes);
     const newPdf = await PDFDocument.create();
 
-    const pages = await newPdf.copyPages(existingPdf, pageNumbers);
+    const validPages = pageNumbers.filter(pageNum => 
+      pageNum >= 0 && pageNum < existingPdf.getPageCount()
+    );
+
+    if (validPages.length === 0) {
+      throw new Error('No valid pages specified for extraction');
+    }
+
+    const pages = await newPdf.copyPages(existingPdf, validPages);
     pages.forEach((page) => newPdf.addPage(page));
 
     const pdfBytes = await newPdf.save();
