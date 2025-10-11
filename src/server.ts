@@ -27,6 +27,13 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 const pdfEditor = new PDFEditor();
 
+const ensureOutputDir = (): void => {
+  const outputDir = 'output';
+  if (!fs.existsSync(outputDir)) {
+    fs.mkdirSync(outputDir);
+  }
+};
+
 app.post('/delete-pages', upload.single('pdf'), async (req, res) => {
   try {
     if (!req.file) {
@@ -39,7 +46,9 @@ app.post('/delete-pages', upload.single('pdf'), async (req, res) => {
     }
 
     const pages = JSON.parse(pagesToDelete).map((p: string) => parseInt(p) - 1);
-    const outputPath = path.join('uploads', `deleted-pages-${Date.now()}.pdf`);
+    ensureOutputDir();
+    
+    const outputPath = path.join('output', `deleted-pages-${Date.now()}.pdf`);
 
     await pdfEditor.deletePages(req.file.path, outputPath, pages);
 
@@ -61,7 +70,8 @@ app.post('/combine-pdfs', upload.array('pdfs'), async (req, res) => {
       return res.status(400).json({ error: 'No PDF files uploaded' });
     }
 
-    const outputPath = path.join('uploads', `combined-${Date.now()}.pdf`);
+    ensureOutputDir();
+    const outputPath = path.join('output', `combined-${Date.now()}.pdf`);
     const inputPaths = files.map((file) => file.path);
 
     await pdfEditor.combinePages(inputPaths, outputPath);
@@ -89,7 +99,9 @@ app.post('/extract-pages', upload.single('pdf'), async (req, res) => {
     }
 
     const pages = JSON.parse(pagesToExtract).map((p: string) => parseInt(p) - 1);
-    const outputPath = path.join('uploads', `extracted-pages-${Date.now()}.pdf`);
+    ensureOutputDir();
+
+    const outputPath = path.join('output', `extracted-pages-${Date.now()}.pdf`);
 
     await pdfEditor.extractPages(req.file.path, outputPath, pages);
 
