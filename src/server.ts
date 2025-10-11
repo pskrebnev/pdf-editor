@@ -54,6 +54,56 @@ app.post('/delete-pages', upload.single('pdf'), async (req, res) => {
   }
 });
 
+app.post('/combine-pdfs', upload.array('pdfs'), async (req, res) => {
+  try {
+    const files = req.files as Express.Multer.File[];
+    if (!files || files.length === 0) {
+      return res.status(400).json({ error: 'No PDF files uploaded' });
+    }
+
+    const outputPath = path.join('uploads', `combined-${Date.now()}.pdf`);
+    const inputPaths = files.map((file) => file.path);
+
+    await pdfEditor.combinePages(inputPaths, outputPath);
+
+    res.download(outputPath, (err) => {
+      if (!err) {
+        files.forEach((file) => fs.unlinkSync(file.path));
+        fs.unlinkSync(outputPath);
+      }
+    });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to combine PDFs' });
+  }
+});
+
+app.post('/extract-pages', upload.single('pdf'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: 'No PDF file uploaded' });
+    }
+
+    const { pagesToExtract } = req.body;
+    if (!pagesToExtract) {
+      return res.status(400).json({ error: 'Pages to extract not specified' });
+    }
+
+    const pages = JSON.parse(pagesToExtract).map((p: string) => parseInt(p) - 1);
+    const outputPath = path.join('uploads', `extracted-pages-${Date.now()}.pdf`);
+
+    await pdfEditor.extractPages(req.file.path, outputPath, pages);
+
+    res.download(outputPath, (err) => {
+      if (!err) {
+        fs.unlinkSync(req.file!.path);
+        fs.unlinkSync(outputPath);
+      }
+    });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to extract pages' });
+  }
+});
+
 app.listen(port, () => {
   console.log(`PDF Editor server running at http://localhost:${port}`);
 });
