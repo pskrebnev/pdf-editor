@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { Request, Response } from 'express';
 import multer from 'multer';
 import cors from 'cors';
 import path from 'path';
@@ -13,14 +13,14 @@ app.use(express.json());
 app.use(express.static('public'));
 
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
+  destination: (req: any, file: any, cb: any) => {
     const uploadDir = 'uploads';
     if (!fs.existsSync(uploadDir)) {
       fs.mkdirSync(uploadDir);
     }
     cb(null, uploadDir);
   },
-  filename: (req, file, cb) => {
+  filename: (req: any, file: any, cb: any) => {
     const timestamp = Date.now();
     cb(null, `${timestamp}-${file.originalname}`);
   },
@@ -36,7 +36,7 @@ const ensureOutputDir = (): void => {
   }
 };
 
-app.post('/delete-pages', upload.single('pdf'), async (req, res) => {
+app.post('/delete-pages', upload.single('pdf'), async (req: Request, res: Response) => {
   try {
     if (!req.file) {
       return res.status(400).json({ error: 'No PDF file uploaded' });
@@ -54,7 +54,7 @@ app.post('/delete-pages', upload.single('pdf'), async (req, res) => {
 
     await pdfEditor.deletePages(req.file.path, outputPath, pages);
 
-    res.download(outputPath, (err) => {
+    res.download(outputPath, (err: any) => {
       if (!err) {
         fs.unlinkSync(req.file!.path);
         fs.unlinkSync(outputPath);
@@ -65,7 +65,7 @@ app.post('/delete-pages', upload.single('pdf'), async (req, res) => {
   }
 });
 
-app.post('/combine-pdfs', upload.array('pdfs'), async (req, res) => {
+app.post('/combine-pdfs', upload.array('pdfs'), async (req: Request, res: Response) => {
   try {
     const files = req.files as Express.Multer.File[];
     if (!files || files.length === 0) {
@@ -78,7 +78,7 @@ app.post('/combine-pdfs', upload.array('pdfs'), async (req, res) => {
 
     await pdfEditor.combinePages(inputPaths, outputPath);
 
-    res.download(outputPath, (err) => {
+    res.download(outputPath, (err: any) => {
       if (!err) {
         files.forEach((file) => fs.unlinkSync(file.path));
         fs.unlinkSync(outputPath);
@@ -89,7 +89,7 @@ app.post('/combine-pdfs', upload.array('pdfs'), async (req, res) => {
   }
 });
 
-app.post('/extract-pages', upload.single('pdf'), async (req, res) => {
+app.post('/extract-pages', upload.single('pdf'), async (req: Request, res: Response) => {
   try {
     if (!req.file) {
       return res.status(400).json({ error: 'No PDF file uploaded' });
@@ -107,7 +107,7 @@ app.post('/extract-pages', upload.single('pdf'), async (req, res) => {
 
     await pdfEditor.extractPages(req.file.path, outputPath, pages);
 
-    res.download(outputPath, (err) => {
+    res.download(outputPath, (err: any) => {
       if (!err) {
         fs.unlinkSync(req.file!.path);
         fs.unlinkSync(outputPath);
