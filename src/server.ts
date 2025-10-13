@@ -39,11 +39,12 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 const pdfEditor = new PDFEditor();
 
-const ensureOutputDir = (): void => {
-  const outputDir = 'output';
+const ensureOutputDir = (): string => {
+  const outputDir = path.join(__dirname, '..', 'output');
   if (!fs.existsSync(outputDir)) {
-    fs.mkdirSync(outputDir);
+    fs.mkdirSync(outputDir, { recursive: true });
   }
+  return outputDir;
 };
 
 app.post(
@@ -63,12 +64,13 @@ app.post(
       const pages = JSON.parse(pagesToDelete).map(
         (p: string) => parseInt(p) - 1
       );
-      ensureOutputDir();
-
+      
+      const outputDir = ensureOutputDir();
       const timestamp = Date.now();
       const filename = `deleted-pages-${timestamp}.pdf`;
-      const outputPath = path.join('output', filename);
+      const outputPath = path.join(outputDir, filename);
       console.log('Generated filename:', filename);
+      console.log('Output directory:', outputDir);
       console.log('Full output path:', outputPath);
 
       await pdfEditor.deletePages(req.file.path, outputPath, pages);
@@ -95,10 +97,10 @@ app.post(
         return res.status(400).json({ error: 'No PDF files uploaded' });
       }
 
-      ensureOutputDir();
+      const outputDir = ensureOutputDir();
       const timestamp = Date.now();
       const filename = `combined-${timestamp}.pdf`;
-      const outputPath = path.join('output', filename);
+      const outputPath = path.join(outputDir, filename);
       const inputPaths = files.map((file) => file.path);
 
       await pdfEditor.combinePages(inputPaths, outputPath);
@@ -134,11 +136,11 @@ app.post(
       const pages = JSON.parse(pagesToExtract).map(
         (p: string) => parseInt(p) - 1
       );
-      ensureOutputDir();
-
+      
+      const outputDir = ensureOutputDir();
       const timestamp = Date.now();
       const filename = `extracted-pages-${timestamp}.pdf`;
-      const outputPath = path.join('output', filename);
+      const outputPath = path.join(outputDir, filename);
 
       await pdfEditor.extractPages(req.file.path, outputPath, pages);
 
