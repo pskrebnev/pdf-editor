@@ -106,6 +106,43 @@
             background: #2980b9;
             transform: translateY(-2px);
         }
+        
+        button:disabled {
+            background: #95a5a6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .status {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 5px;
+            display: none;
+        }
+        
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .status.loading {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        
+        .help-text {
+            font-size: 12px;
+            color: #6c757d;
+            margin-top: 5px;
+        }
     </style>
 </head>
 <body>
@@ -118,25 +155,43 @@
         <div class="content">
             <!-- Delete Pages -->
             <div class="operation">
-            <h3>Delete Pages</h3>
-            <input type="file" id="deleteFile" accept=".pdf" />
-            <input type="text" id="pagesToDelete" placeholder="Pages to delete (e.g., 1,3,5)" />
-            <button onclick="deletePages()">Delete Pages</button>
+                <h3>Delete Pages</h3>
+                <div class="file-input">
+                    <input type="file" id="deleteFile" accept=".pdf" />
+                    <div class="help-text">Select a PDF file to delete pages from</div>
+                </div>
+                <div class="text-input">
+                    <input type="text" id="pagesToDelete" placeholder="e.g., 1,3,5 or 1-3,7" />
+                    <div class="help-text">Enter page numbers to delete (comma-separated or ranges)</div>
+                </div>
+                <button onclick="deletePages()">Delete Pages</button>
+                <div class="status" id="deleteStatus"></div>
             </div>
             
             <!-- Combine PDFs -->
             <div class="operation">
                 <h3>Combine PDFs</h3>
-                <input type="file" id="combineFiles" accept=".pdf" multiple />
+                <div class="file-input">
+                    <input type="file" id="combineFiles" accept=".pdf" multiple />
+                    <div class="help-text">Select multiple PDF files to combine</div>
+                </div>
                 <button onclick="combinePDFs()">Combine PDFs</button>
+                <div class="status" id="combineStatus"></div>
             </div>
             
             <!-- Extract Pages -->
             <div class="operation">
                 <h3>Extract Pages</h3>
-                <input type="file" id="extractFile" accept=".pdf" />
-                <input type="text" id="pagesToExtract" placeholder="Pages to extract (e.g., 1,3,5)" />
+                <div class="file-input">
+                    <input type="file" id="extractFile" accept=".pdf" />
+                    <div class="help-text">Select a PDF file to extract pages from</div>
+                </div>
+                <div class="text-input">
+                    <input type="text" id="pagesToExtract" placeholder="e.g., 1,3,5 or 1-3,7" />
+                    <div class="help-text">Enter page numbers to extract (comma-separated or ranges)</div>
+                </div>
                 <button onclick="extractPages()">Extract Pages</button>
+                <div class="status" id="extractStatus"></div>
             </div>
         </div>
     </div>
