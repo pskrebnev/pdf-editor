@@ -52,11 +52,18 @@ The application will be available at `http://localhost:3000`
 
 ### Production Build
 
-Build the project:
+Build the entire project (backend + frontend):
 
 ```bash
-npm run build
+npm run build:all
 npm run web:build
+```
+
+Or build components separately:
+
+```bash
+npm run build          # Backend only
+npm run build:frontend # Frontend only
 ```
 
 ### CLI Usage
@@ -66,6 +73,15 @@ You can also use the PDF editor programmatically:
 ```bash
 npm run dev
 ```
+
+## TypeScript Setup
+
+This project uses TypeScript for both backend and frontend code:
+
+- **Backend**: `src/index.ts` and `src/server.ts` compile to `dist/`
+- **Frontend**: `src/script.ts` compiles to `public/script.js`
+- **Separate configs**: `tsconfig.json` for backend, `tsconfig.frontend.json` for frontend
+- **Type safety**: Full TypeScript checking for all code including DOM APIs
 
 ## API Endpoints
 
@@ -79,13 +95,16 @@ npm run dev
 pdf-editor/
 ├── src/
 │   ├── index.ts          # Core PDF editing logic
-│   └── server.ts         # Express server and API routes
+│   ├── server.ts         # Express server and API routes
+│   └── script.ts         # Frontend TypeScript (compiled to public/)
 ├── public/
 │   ├── index.html        # Web interface
-│   └── script.js         # Frontend JavaScript
-├── dist/                 # Compiled TypeScript output
+│   └── script.js         # Generated frontend JavaScript (from src/script.ts)
+├── dist/                 # Compiled backend TypeScript output
 ├── uploads/              # Temporary file uploads
 ├── output/               # Generated PDF files
+├── tsconfig.json         # Backend TypeScript configuration
+├── tsconfig.frontend.json # Frontend TypeScript configuration
 └── package.json
 ```
 
@@ -101,8 +120,12 @@ pdf-editor/
 
 - `npm run dev` - Run CLI version in development
 - `npm run web` - Start web server in development
-- `npm run build` - Compile TypeScript
-- `npm run lint` - Run ESLint
+- `npm run build` - Compile backend TypeScript
+- `npm run build:frontend` - Compile frontend TypeScript
+- `npm run build:all` - Compile both backend and frontend
+- `npm run web:build` - Full build + start production server
+- `npm run lint` - Run ESLint on all TypeScript files
+- `npm run lint:fix` - Auto-fix ESLint issues
 - `npm run format` - Format code with Prettier
 
 ## License
