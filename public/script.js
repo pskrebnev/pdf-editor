@@ -1,3 +1,67 @@
+// Input validation for page numbers (only digits, commas, and dashes)
+function validatePageInput(event) {
+    const allowedKeys = [
+        'Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown',
+        'Home', 'End', 'Tab', 'Enter'
+    ];
+    
+    // Allow control keys
+    if (allowedKeys.includes(event.key)) {
+        return true;
+    }
+    
+    // Allow digits, commas, and dashes
+    const allowedChars = /[0-9,-]/;
+    if (!allowedChars.test(event.key)) {
+        event.preventDefault();
+        return false;
+    }
+    
+    return true;
+}
+
+// Format and clean page input
+function formatPageInput(input) {
+    // Remove any characters that aren't digits, commas, or dashes
+    let cleaned = input.value.replace(/[^0-9,-]/g, '');
+    
+    // Remove multiple consecutive commas or dashes
+    cleaned = cleaned.replace(/[,-]{2,}/g, (match) => match[0]);
+    
+    // Remove leading/trailing commas or dashes
+    cleaned = cleaned.replace(/^[,-]+|[,-]+$/g, '');
+    
+    input.value = cleaned;
+}
+
+// Add real-time validation to page input fields
+function setupInputValidation() {
+    const pageInputs = ['pagesToDelete', 'pagesToExtract'];
+    
+    pageInputs.forEach(id => {
+        const input = document.getElementById(id);
+        if (input) {
+            // Prevent invalid characters on keydown
+            input.addEventListener('keydown', validatePageInput);
+            
+            // Clean up input on blur
+            input.addEventListener('blur', () => formatPageInput(input));
+            
+            // Real-time cleaning on input
+            input.addEventListener('input', () => {
+                // Remove invalid characters as user types
+                const cleaned = input.value.replace(/[^0-9,-]/g, '');
+                if (cleaned !== input.value) {
+                    input.value = cleaned;
+                }
+            });
+        }
+    });
+}
+
+// Initialize validation when page loads
+document.addEventListener('DOMContentLoaded', setupInputValidation);
+
 async function deletePages() {
     const fileInput = document.getElementById('deleteFile');
     const pagesInput = document.getElementById('pagesToDelete');
