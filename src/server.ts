@@ -73,7 +73,7 @@ app.post(
 
       await pdfEditor.deletePages(req.file.path, outputPath, pages);
 
-      res.download(outputPath, (err: unknown) => {
+      res.download(outputPath, filename, (err: unknown) => {
         if (!err) {
           fs.unlinkSync(req.file!.path);
           fs.unlinkSync(outputPath);
@@ -103,7 +103,7 @@ app.post(
 
       await pdfEditor.combinePages(inputPaths, outputPath);
 
-      res.download(outputPath, (err: unknown) => {
+      res.download(outputPath, filename, (err: unknown) => {
         if (!err) {
           files.forEach((file) => fs.unlinkSync(file.path));
           fs.unlinkSync(outputPath);
@@ -142,7 +142,7 @@ app.post(
 
       await pdfEditor.extractPages(req.file.path, outputPath, pages);
 
-      res.download(outputPath, (err: unknown) => {
+      res.download(outputPath, filename, (err: unknown) => {
         if (!err) {
           fs.unlinkSync(req.file!.path);
           fs.unlinkSync(outputPath);
