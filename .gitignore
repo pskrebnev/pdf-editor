@@ -4,4 +4,5 @@ dist/
 .env
 uploads/
 output/
+public/script.js
 
