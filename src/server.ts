@@ -64,7 +64,7 @@ app.post(
       const pages = JSON.parse(pagesToDelete).map(
         (p: string) => parseInt(p) - 1
       );
-      
+
       const outputDir = ensureOutputDir();
       const timestamp = Date.now();
       const filename = `deleted-pages-${timestamp}.pdf`;
@@ -136,7 +136,7 @@ app.post(
       const pages = JSON.parse(pagesToExtract).map(
         (p: string) => parseInt(p) - 1
       );
-      
+
       const outputDir = ensureOutputDir();
       const timestamp = Date.now();
       const filename = `extracted-pages-${timestamp}.pdf`;
