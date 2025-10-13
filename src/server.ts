@@ -75,6 +75,7 @@ app.post(
 
       await pdfEditor.deletePages(req.file.path, outputPath, pages);
 
+      res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
       res.download(outputPath, filename, (err: unknown) => {
         if (!err) {
           fs.unlinkSync(req.file!.path);
@@ -105,6 +106,7 @@ app.post(
 
       await pdfEditor.combinePages(inputPaths, outputPath);
 
+      res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
       res.download(outputPath, filename, (err: unknown) => {
         if (!err) {
           files.forEach((file) => fs.unlinkSync(file.path));
@@ -144,6 +146,7 @@ app.post(
 
       await pdfEditor.extractPages(req.file.path, outputPath, pages);
 
+      res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
       res.download(outputPath, filename, (err: unknown) => {
         if (!err) {
           fs.unlinkSync(req.file!.path);
