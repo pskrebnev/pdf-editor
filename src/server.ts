@@ -65,10 +65,11 @@ app.post(
       );
       ensureOutputDir();
 
-      const outputPath = path.join(
-        'output',
-        'deleted-pages-' + Date.now() + '.pdf'
-      );
+      const timestamp = Date.now();
+      const filename = `deleted-pages-${timestamp}.pdf`;
+      const outputPath = path.join('output', filename);
+      console.log('Generated filename:', filename);
+      console.log('Full output path:', outputPath);
 
       await pdfEditor.deletePages(req.file.path, outputPath, pages);
 
@@ -95,7 +96,9 @@ app.post(
       }
 
       ensureOutputDir();
-      const outputPath = path.join('output', 'combined-' + Date.now() + '.pdf');
+      const timestamp = Date.now();
+      const filename = `combined-${timestamp}.pdf`;
+      const outputPath = path.join('output', filename);
       const inputPaths = files.map((file) => file.path);
 
       await pdfEditor.combinePages(inputPaths, outputPath);
@@ -133,10 +136,9 @@ app.post(
       );
       ensureOutputDir();
 
-      const outputPath = path.join(
-        'output',
-        'extracted-pages-' + Date.now() + '.pdf'
-      );
+      const timestamp = Date.now();
+      const filename = `extracted-pages-${timestamp}.pdf`;
+      const outputPath = path.join('output', filename);
 
       await pdfEditor.extractPages(req.file.path, outputPath, pages);
 
