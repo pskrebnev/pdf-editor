@@ -1,11 +1,11 @@
-const js = require('@eslint/js');
-const tsPlugin = require('@typescript-eslint/eslint-plugin');
-const tsParser = require('@typescript-eslint/parser');
-const prettierConfig = require('eslint-config-prettier');
-const prettierPlugin = require('eslint-plugin-prettier');
+import { configs } from '@eslint/js';
+import tsPlugin, { configs as _configs } from '@typescript-eslint/eslint-plugin';
+import tsParser from '@typescript-eslint/parser';
+import { rules as _rules } from 'eslint-config-prettier';
+import prettierPlugin from 'eslint-plugin-prettier';
 
-module.exports = [
-  js.configs.recommended,
+export default [
+  configs.recommended,
   {
     files: ['src/**/*.ts'],
     languageOptions: {
@@ -20,8 +20,8 @@ module.exports = [
       prettier: prettierPlugin,
     },
     rules: {
-      ...tsPlugin.configs.recommended.rules,
-      ...prettierConfig.rules,
+      ..._configs.recommended.rules,
+      ..._rules,
       'prettier/prettier': 'error',
       '@typescript-eslint/no-unused-vars': 'warn',
       '@typescript-eslint/explicit-function-return-type': 'off',
