@@ -1,12 +1,18 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable no-undef */
 import { PDFDocument } from 'pdf-lib';
 import * as fs from 'fs';
 
 export class PDFEditor {
-  async deletePages(inputPath: string, outputPath: string, pagesToDelete: number[]): Promise<void> {
+  async deletePages(
+    inputPath: string,
+    outputPath: string,
+    pagesToDelete: number[]
+  ): Promise<void> {
     if (!fs.existsSync(inputPath)) {
       throw new Error(`Input file not found: ${inputPath}`);
     }
-    
+
     const existingPdfBytes = fs.readFileSync(inputPath);
     const pdfDoc = await PDFDocument.load(existingPdfBytes);
 
@@ -16,7 +22,9 @@ export class PDFEditor {
       if (pageNum >= 0 && pageNum < pdfDoc.getPageCount()) {
         pdfDoc.removePage(pageNum);
       } else {
-        console.warn(`Page ${pageNum + 1} is out of range (1-${pdfDoc.getPageCount()})`);
+        console.warn(
+          `Page ${pageNum + 1} is out of range (1-${pdfDoc.getPageCount()})`
+        );
       }
     }
 
@@ -28,7 +36,7 @@ export class PDFEditor {
     if (inputPaths.length === 0) {
       throw new Error('No input files specified');
     }
-    
+
     const combinedPdf = await PDFDocument.create();
 
     for (const inputPath of inputPaths) {
@@ -37,7 +45,10 @@ export class PDFEditor {
       }
       const existingPdfBytes = fs.readFileSync(inputPath);
       const existingPdf = await PDFDocument.load(existingPdfBytes);
-      const pages = await combinedPdf.copyPages(existingPdf, existingPdf.getPageIndices());
+      const pages = await combinedPdf.copyPages(
+        existingPdf,
+        existingPdf.getPageIndices()
+      );
 
       pages.forEach((page) => combinedPdf.addPage(page));
     }
@@ -46,17 +57,21 @@ export class PDFEditor {
     fs.writeFileSync(outputPath, pdfBytes);
   }
 
-  async extractPages(inputPath: string, outputPath: string, pageNumbers: number[]): Promise<void> {
+  async extractPages(
+    inputPath: string,
+    outputPath: string,
+    pageNumbers: number[]
+  ): Promise<void> {
     if (!fs.existsSync(inputPath)) {
       throw new Error(`Input file not found: ${inputPath}`);
     }
-    
+
     const existingPdfBytes = fs.readFileSync(inputPath);
     const existingPdf = await PDFDocument.load(existingPdfBytes);
     const newPdf = await PDFDocument.create();
 
-    const validPages = pageNumbers.filter(pageNum => 
-      pageNum >= 0 && pageNum < existingPdf.getPageCount()
+    const validPages = pageNumbers.filter(
+      (pageNum) => pageNum >= 0 && pageNum < existingPdf.getPageCount()
     );
 
     if (validPages.length === 0) {

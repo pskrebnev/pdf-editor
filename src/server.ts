@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable no-undef */
 import express, { Request, Response } from 'express';
 import multer from 'multer';
 import cors from 'cors';
@@ -13,14 +15,22 @@ app.use(express.json());
 app.use(express.static('public'));
 
 const storage = multer.diskStorage({
-  destination: (req: any, file: any, cb: any) => {
+  destination: (
+    req: Request,
+    file: Express.Multer.File,
+    cb: (error: Error | null, destination: string) => void
+  ) => {
     const uploadDir = 'uploads';
     if (!fs.existsSync(uploadDir)) {
       fs.mkdirSync(uploadDir);
     }
     cb(null, uploadDir);
   },
-  filename: (req: any, file: any, cb: any) => {
+  filename: (
+    req: Request,
+    file: Express.Multer.File,
+    cb: (error: Error | null, filename: string) => void
+  ) => {
     const timestamp = Date.now();
     cb(null, `${timestamp}-${file.originalname}`);
   },
@@ -36,87 +46,108 @@ const ensureOutputDir = (): void => {
   }
 };
 
-app.post('/delete-pages', upload.single('pdf'), async (req: Request, res: Response) => {
-  try {
-    if (!req.file) {
-      return res.status(400).json({ error: 'No PDF file uploaded' });
-    }
-
-    const { pagesToDelete } = req.body;
-    if (!pagesToDelete) {
-      return res.status(400).json({ error: 'Pages to delete not specified' });
-    }
-
-    const pages = JSON.parse(pagesToDelete).map((p: string) => parseInt(p) - 1);
-    ensureOutputDir();
-    
-    const outputPath = path.join('output', `deleted-pages-${Date.now()}.pdf`);
-
-    await pdfEditor.deletePages(req.file.path, outputPath, pages);
-
-    res.download(outputPath, (err: any) => {
-      if (!err) {
-        fs.unlinkSync(req.file!.path);
-        fs.unlinkSync(outputPath);
+app.post(
+  '/delete-pages',
+  upload.single('pdf'),
+  async (req: Request, res: Response) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ error: 'No PDF file uploaded' });
       }
-    });
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to delete pages' });
-  }
-});
 
-app.post('/combine-pdfs', upload.array('pdfs'), async (req: Request, res: Response) => {
-  try {
-    const files = req.files as Express.Multer.File[];
-    if (!files || files.length === 0) {
-      return res.status(400).json({ error: 'No PDF files uploaded' });
-    }
-
-    ensureOutputDir();
-    const outputPath = path.join('output', `combined-${Date.now()}.pdf`);
-    const inputPaths = files.map((file) => file.path);
-
-    await pdfEditor.combinePages(inputPaths, outputPath);
-
-    res.download(outputPath, (err: any) => {
-      if (!err) {
-        files.forEach((file) => fs.unlinkSync(file.path));
-        fs.unlinkSync(outputPath);
+      const { pagesToDelete } = req.body;
+      if (!pagesToDelete) {
+        return res.status(400).json({ error: 'Pages to delete not specified' });
       }
-    });
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to combine PDFs' });
+
+      const pages = JSON.parse(pagesToDelete).map(
+        (p: string) => parseInt(p) - 1
+      );
+      ensureOutputDir();
+
+      const outputPath = path.join('output', `deleted-pages-${Date.now()}.pdf`);
+
+      await pdfEditor.deletePages(req.file.path, outputPath, pages);
+
+      res.download(outputPath, (err: unknown) => {
+        if (!err) {
+          fs.unlinkSync(req.file!.path);
+          fs.unlinkSync(outputPath);
+        }
+      });
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to delete pages' });
+    }
   }
-});
+);
 
-app.post('/extract-pages', upload.single('pdf'), async (req: Request, res: Response) => {
-  try {
-    if (!req.file) {
-      return res.status(400).json({ error: 'No PDF file uploaded' });
-    }
-
-    const { pagesToExtract } = req.body;
-    if (!pagesToExtract) {
-      return res.status(400).json({ error: 'Pages to extract not specified' });
-    }
-
-    const pages = JSON.parse(pagesToExtract).map((p: string) => parseInt(p) - 1);
-    ensureOutputDir();
-
-    const outputPath = path.join('output', `extracted-pages-${Date.now()}.pdf`);
-
-    await pdfEditor.extractPages(req.file.path, outputPath, pages);
-
-    res.download(outputPath, (err: any) => {
-      if (!err) {
-        fs.unlinkSync(req.file!.path);
-        fs.unlinkSync(outputPath);
+app.post(
+  '/combine-pdfs',
+  upload.array('pdfs'),
+  async (req: Request, res: Response) => {
+    try {
+      const files = req.files as Express.Multer.File[];
+      if (!files || files.length === 0) {
+        return res.status(400).json({ error: 'No PDF files uploaded' });
       }
-    });
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to extract pages' });
+
+      ensureOutputDir();
+      const outputPath = path.join('output', `combined-${Date.now()}.pdf`);
+      const inputPaths = files.map((file) => file.path);
+
+      await pdfEditor.combinePages(inputPaths, outputPath);
+
+      res.download(outputPath, (err: unknown) => {
+        if (!err) {
+          files.forEach((file) => fs.unlinkSync(file.path));
+          fs.unlinkSync(outputPath);
+        }
+      });
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to combine PDFs' });
+    }
   }
-});
+);
+
+app.post(
+  '/extract-pages',
+  upload.single('pdf'),
+  async (req: Request, res: Response) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ error: 'No PDF file uploaded' });
+      }
+
+      const { pagesToExtract } = req.body;
+      if (!pagesToExtract) {
+        return res
+          .status(400)
+          .json({ error: 'Pages to extract not specified' });
+      }
+
+      const pages = JSON.parse(pagesToExtract).map(
+        (p: string) => parseInt(p) - 1
+      );
+      ensureOutputDir();
+
+      const outputPath = path.join(
+        'output',
+        `extracted-pages-${Date.now()}.pdf`
+      );
+
+      await pdfEditor.extractPages(req.file.path, outputPath, pages);
+
+      res.download(outputPath, (err: unknown) => {
+        if (!err) {
+          fs.unlinkSync(req.file!.path);
+          fs.unlinkSync(outputPath);
+        }
+      });
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to extract pages' });
+    }
+  }
+);
 
 app.listen(port, () => {
   console.log(`PDF Editor server running at http://localhost:${port}`);
