@@ -65,7 +65,10 @@ app.post(
       );
       ensureOutputDir();
 
-      const outputPath = path.join('output', 'deleted-pages-' + Date.now() + '.pdf');
+      const outputPath = path.join(
+        'output',
+        'deleted-pages-' + Date.now() + '.pdf'
+      );
 
       await pdfEditor.deletePages(req.file.path, outputPath, pages);
 
@@ -130,7 +133,10 @@ app.post(
       );
       ensureOutputDir();
 
-      const outputPath = path.join('output', 'extracted-pages-' + Date.now() + '.pdf');
+      const outputPath = path.join(
+        'output',
+        'extracted-pages-' + Date.now() + '.pdf'
+      );
 
       await pdfEditor.extractPages(req.file.path, outputPath, pages);
 
