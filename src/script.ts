@@ -230,7 +230,89 @@ async function extractPages(): Promise<void> {
   }
 }
 
+function showStatus(elementId: string, message: string, type: 'success' | 'error' | 'loading'): void {
+  const statusElement = document.getElementById(elementId);
+  if (statusElement) {
+    statusElement.textContent = message;
+    statusElement.className = `status ${type}`;
+    statusElement.style.display = 'block';
+  }
+}
+
+function hideStatus(elementId: string): void {
+  const statusElement = document.getElementById(elementId);
+  if (statusElement) {
+    statusElement.style.display = 'none';
+  }
+}
+
+function formatFileSize(bytes: number): string {
+  const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+  if (bytes === 0) return '0 Bytes';
+  const i = Math.floor(Math.log(bytes) / Math.log(1024));
+  return Math.round(bytes / Math.pow(1024, i) * 100) / 100 + ' ' + sizes[i];
+}
+
+async function optimizePdf(): Promise<void> {
+  const fileInput = document.getElementById('optimizeFile') as HTMLInputElement;
+  const compressionSelect = document.getElementById('compressionLevel') as HTMLSelectElement;
+  const statusId = 'optimizeStatus';
+
+  if (!fileInput.files?.[0]) {
+    alert('Please select a PDF file');
+    return;
+  }
+
+  const compressionLevel = compressionSelect.value;
+  const formData = new FormData();
+  formData.append('pdf', fileInput.files[0]);
+  formData.append('compressionLevel', compressionLevel);
+
+  showStatus(statusId, 'Optimizing PDF...', 'loading');
+
+  try {
+    const response = await fetch('/optimize-pdf', {
+      method: 'POST',
+      body: formData,
+    });
+
+    if (response.ok) {
+      const originalSize = parseInt(response.headers.get('X-Original-Size') || '0');
+      const optimizedSize = parseInt(response.headers.get('X-Optimized-Size') || '0');
+      const compressionRatio = parseFloat(response.headers.get('X-Compression-Ratio') || '0');
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      
+      const contentDisposition = response.headers.get('content-disposition');
+      let filename = 'optimized.pdf';
+      if (contentDisposition) {
+        const filenameMatch = contentDisposition.match(/filename="?([^"]+)"?/);
+        if (filenameMatch) {
+          filename = filenameMatch[1];
+        }
+      }
+      
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+
+      const statusMessage = `PDF optimized successfully! Original: ${formatFileSize(originalSize)}, Optimized: ${formatFileSize(optimizedSize)}, Compression: ${compressionRatio}%`;
+      showStatus(statusId, statusMessage, 'success');
+    } else {
+      showStatus(statusId, 'Error optimizing PDF', 'error');
+    }
+  } catch (error) {
+    showStatus(statusId, 'Network error', 'error');
+  }
+}
+
 // Make functions available globally for onclick handlers
 (window as any).deletePages = deletePages;
 (window as any).combinePDFs = combinePDFs;
 (window as any).extractPages = extractPages;
+(window as any).optimizePdf = optimizePdf;

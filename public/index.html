@@ -91,6 +91,33 @@
             box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
         }
         
+        .select-input {
+            margin: 10px 0;
+        }
+        
+        .select-input label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            background: white;
+            cursor: pointer;
+        }
+        
+        select:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+        }
+        
         button {
             background: #3498db;
             color: white;
@@ -149,7 +176,7 @@
     <div class="container">
         <div class="header">
             <h1>PDF Editor</h1>
-            <p>Delete pages, combine PDFs, and extract pages with ease</p>
+            <p>Delete pages, combine PDFs, extract pages, and optimize file size with ease</p>
         </div>
         
         <div class="content">
@@ -192,6 +219,26 @@
                 </div>
                 <button onclick="extractPages()">Extract Pages</button>
                 <div class="status" id="extractStatus"></div>
+            </div>
+            
+            <!-- Optimize PDF -->
+            <div class="operation">
+                <h3>Optimize PDF</h3>
+                <div class="file-input">
+                    <input type="file" id="optimizeFile" accept=".pdf" />
+                    <div class="help-text">Select a PDF file to optimize and reduce file size</div>
+                </div>
+                <div class="select-input">
+                    <label for="compressionLevel">Compression Level:</label>
+                    <select id="compressionLevel">
+                        <option value="low">Low (minimal compression)</option>
+                        <option value="medium" selected>Medium (balanced)</option>
+                        <option value="high">High (maximum compression)</option>
+                    </select>
+                    <div class="help-text">Choose compression level - higher compression reduces file size more but may affect quality</div>
+                </div>
+                <button onclick="optimizePdf()">Optimize PDF</button>
+                <div class="status" id="optimizeStatus"></div>
             </div>
         </div>
     </div>

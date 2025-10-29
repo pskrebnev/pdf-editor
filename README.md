@@ -1,12 +1,13 @@
 # PDF Editor
 
-A simple and intuitive web-based PDF editor that allows you to perform basic PDF operations like deleting pages, combining multiple PDFs, and extracting specific pages.
+A simple and intuitive web-based PDF editor that allows you to perform basic PDF operations like deleting pages, combining multiple PDFs, extracting specific pages, and optimizing file size.
 
 ## Features
 
 - **Delete Pages**: Remove unwanted pages from your PDF documents
 - **Combine PDFs**: Merge multiple PDF files into a single document
 - **Extract Pages**: Extract specific pages from a PDF into a new document
+- **Optimize PDFs**: Reduce file size by compressing PDF documents with configurable compression levels
 - **Web Interface**: Clean, modern web UI for easy file operations
 - **REST API**: Full API endpoints for programmatic access
 
@@ -88,6 +89,16 @@ This project uses TypeScript for both backend and frontend code:
 - `POST /delete-pages` - Delete specific pages from a PDF
 - `POST /combine-pdfs` - Combine multiple PDF files
 - `POST /extract-pages` - Extract specific pages from a PDF
+- `POST /optimize-pdf` - Optimize PDF file size with configurable compression levels
+
+### PDF Optimization
+
+The optimization feature supports three compression levels:
+- **Low**: Minimal compression with best quality preservation
+- **Medium**: Balanced compression and quality (default)
+- **High**: Maximum compression for smallest file size
+
+The optimization process returns compression statistics including original size, optimized size, and compression ratio.
 
 ## Project Structure
 

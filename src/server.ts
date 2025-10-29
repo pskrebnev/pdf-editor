@@ -159,6 +159,46 @@ app.post(
   }
 );
 
+app.post(
+  '/optimize-pdf',
+  upload.single('pdf'),
+  async (req: Request, res: Response) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ error: 'No PDF file uploaded' });
+      }
+
+      const { compressionLevel } = req.body;
+      const level = compressionLevel || 'medium';
+
+      if (!['low', 'medium', 'high'].includes(level)) {
+        return res.status(400).json({ error: 'Invalid compression level' });
+      }
+
+      const outputDir = ensureOutputDir();
+      const timestamp = Date.now();
+      const filename = `optimized-${timestamp}.pdf`;
+      const outputPath = path.join(outputDir, filename);
+
+      const result = await pdfEditor.optimizePdf(req.file.path, outputPath, level);
+
+      res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+      res.setHeader('X-Original-Size', result.originalSize.toString());
+      res.setHeader('X-Optimized-Size', result.optimizedSize.toString());
+      res.setHeader('X-Compression-Ratio', result.compressionRatio.toString());
+      
+      res.download(outputPath, filename, (err: unknown) => {
+        if (!err) {
+          fs.unlinkSync(req.file!.path);
+          fs.unlinkSync(outputPath);
+        }
+      });
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to optimize PDF' });
+    }
+  }
+);
+
 app.listen(port, () => {
   console.log(`PDF Editor server running at http://localhost:${port}`);
 });

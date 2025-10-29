@@ -84,6 +84,57 @@ export class PDFEditor {
     const pdfBytes = await newPdf.save();
     fs.writeFileSync(outputPath, pdfBytes);
   }
+
+  async optimizePdf(
+    inputPath: string,
+    outputPath: string,
+    compressionLevel: 'low' | 'medium' | 'high' = 'medium'
+  ): Promise<{ originalSize: number; optimizedSize: number; compressionRatio: number }> {
+    if (!fs.existsSync(inputPath)) {
+      throw new Error(`Input file not found: ${inputPath}`);
+    }
+
+    const existingPdfBytes = fs.readFileSync(inputPath);
+    const originalSize = existingPdfBytes.length;
+    
+    const pdfDoc = await PDFDocument.load(existingPdfBytes);
+
+    let saveOptions: any = {};
+
+    switch (compressionLevel) {
+      case 'low':
+        saveOptions = {
+          useObjectStreams: false,
+          addDefaultPage: false,
+        };
+        break;
+      case 'medium':
+        saveOptions = {
+          useObjectStreams: true,
+          addDefaultPage: false,
+        };
+        break;
+      case 'high':
+        saveOptions = {
+          useObjectStreams: true,
+          addDefaultPage: false,
+          updateFieldAppearances: false,
+        };
+        break;
+    }
+
+    const optimizedBytes = await pdfDoc.save(saveOptions);
+    const optimizedSize = optimizedBytes.length;
+    const compressionRatio = ((originalSize - optimizedSize) / originalSize) * 100;
+
+    fs.writeFileSync(outputPath, optimizedBytes);
+
+    return {
+      originalSize,
+      optimizedSize,
+      compressionRatio: Math.round(compressionRatio * 100) / 100,
+    };
+  }
 }
 
 async function main(): Promise<void> {
@@ -93,6 +144,7 @@ async function main(): Promise<void> {
   console.log('- deletePages(inputPath, outputPath, pagesToDelete)');
   console.log('- combinePages(inputPaths, outputPath)');
   console.log('- extractPages(inputPath, outputPath, pageNumbers)');
+  console.log('- optimizePdf(inputPath, outputPath, compressionLevel)');
 }
 
 if (require.main === module) {
