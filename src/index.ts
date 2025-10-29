@@ -99,6 +99,9 @@ export class PDFEditor {
     
     const pdfDoc = await PDFDocument.load(existingPdfBytes);
 
+    const pageCount = pdfDoc.getPageCount();
+    console.log(`Optimizing PDF with ${pageCount} pages`);
+
     let saveOptions: any = {};
 
     switch (compressionLevel) {
@@ -124,10 +127,34 @@ export class PDFEditor {
     }
 
     const optimizedBytes = await pdfDoc.save(saveOptions);
-    const optimizedSize = optimizedBytes.length;
+    let optimizedSize = optimizedBytes.length;
+    let currentBytes = optimizedBytes;
+
+    if (compressionLevel === 'high') {
+      try {
+        const secondPassDoc = await PDFDocument.load(currentBytes);
+        
+        const finalBytes = await secondPassDoc.save({
+          useObjectStreams: true,
+          addDefaultPage: false,
+          updateFieldAppearances: false,
+        });
+        
+        if (finalBytes.length < optimizedSize) {
+          currentBytes = finalBytes;
+          optimizedSize = finalBytes.length;
+          console.log('Second optimization pass applied');
+        }
+      } catch (error) {
+        console.warn('Second optimization pass failed, using first pass result');
+      }
+    }
+
     const compressionRatio = ((originalSize - optimizedSize) / originalSize) * 100;
 
-    fs.writeFileSync(outputPath, optimizedBytes);
+    fs.writeFileSync(outputPath, currentBytes);
+
+    console.log(`Optimization complete: ${originalSize} -> ${optimizedSize} bytes (${compressionRatio.toFixed(2)}% reduction)`);
 
     return {
       originalSize,

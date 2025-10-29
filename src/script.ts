@@ -301,7 +301,16 @@ async function optimizePdf(): Promise<void> {
       document.body.removeChild(a);
       window.URL.revokeObjectURL(url);
 
-      const statusMessage = `PDF optimized successfully! Original: ${formatFileSize(originalSize)}, Optimized: ${formatFileSize(optimizedSize)}, Compression: ${compressionRatio}%`;
+      let statusMessage = `PDF optimized successfully! Original: ${formatFileSize(originalSize)}, Optimized: ${formatFileSize(optimizedSize)}, Compression: ${compressionRatio}%`;
+      
+      if (compressionRatio < 1) {
+        statusMessage += ` (Note: This PDF was already well-optimized, minimal reduction achieved)`;
+      } else if (compressionRatio < 5) {
+        statusMessage += ` (Small reduction - PDF had limited optimization potential)`;
+      } else if (compressionRatio > 20) {
+        statusMessage += ` (Excellent compression achieved!)`;
+      }
+      
       showStatus(statusId, statusMessage, 'success');
     } else {
       showStatus(statusId, 'Error optimizing PDF', 'error');
